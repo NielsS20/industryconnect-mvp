@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IndustryConnect MVP - Industriemontage Opportunity Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/lucide.min.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        .transition-all {
+            transition: all 0.3s ease;
+        }
+        .hover\:scale-110:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50">
+    <div id="app"></div>
+
+    <script>
+        // Mock Data
+        const mockOpportunities = [
+            {
+                id: 1,
+                title: "BMW erweitert Elektrofahrzeug-Produktion in München",
+                company: "BMW AG",
+                location: "München, Bayern",
+                region: "bayern",
+                category: "expansion",
+                priority: "high",
+                confidence: 92,
+                source: "Süddeutsche Zeitung",
+                sourceUrl: "https://sz.de/1.5847392",
+                date: "2025-06-29",
+                publishedDate: "29.06.2025",
+                description: "BMW plant eine neue Fertigungslinie für Elektrofahrzeuge mit hochmoderner Automatisierungstechnik. Die Investition von 200 Mio. Euro umfasst neue Produktionsanlagen, Robotik und Montagesysteme.",
+                keywords: ["Fertigungslinie", "Produktionserweiterung", "Elektrofahrzeuge", "Automatisierung", "Robotik"],
+                estimatedValue: "500.000 - 2.000.000",
+                projectTimeline: "Q3 2025 - Q2 2026",
+                contactPersons: [
+                    {
+                        name: "Dr. Michael Weber",
+                        position: "Head of Production Engineering",
+                        department: "BMW Produktion",
+                        email: "michael.weber@bmw.de",
+                        phone: "+49 89 382-12345",
+                        linkedinUrl: "https://www.linkedin.com/in/michael-weber-bmw",
+                        linkedinProfile: "michael-weber-bmw",
+                        photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face"
+                    },
+                    {
+                        name: "Sarah Müller",
+                        position: "Project Manager Facility Engineering",
+                        department: "BMW Anlagenbau",
+                        email: "sarah.mueller@bmw.de",
+                        phone: "+49 89 382-12346",
+                        linkedinUrl: "https://www.linkedin.com/in/sarah-mueller-engineering",
+                        linkedinProfile: "sarah-mueller-engineering",
+                        photo: "https://images.unsplash.com/photo-1494790108755-2616b9a7e4d0?w=150&h=150&fit=crop&crop=face"
+                    }
+                ],
+                nextSteps: "Kontakt zu Projektleitung aufnehmen - Ausschreibung erwartet Q3 2025",
+                urgencyLevel: "Hoch - Projektstart in 3 Monaten",
+                competitorRisk: "Mittel",
+                tags: ["Automotive", "E-Mobility", "High-Tech"],
+                lastUpdated: "2025-06-30T08:30:00Z"
+            },
+            {
+                id: 2,
+                title: "Siemens verlagert Automatisierungsproduktion nach Dresden",
+                company: "Siemens AG",
+                location: "Dresden, Sachsen / Erlangen, Bayern",
+                region: "sachsen",
+                category: "relocation",
+                priority: "high",
+                confidence: 88,
+                source: "Handelsblatt",
+                sourceUrl: "https://handelsblatt.com/unternehmen/industrie",
+                date: "2025-06-28",
+                publishedDate: "28.06.2025",
+                description: "Komplette Verlagerung der Automatisierungstechnik-Produktion von Erlangen nach Dresden. Über 50 hochkomplexe Produktionsmaschinen und Anlagen müssen demontiert, transportiert und neu installiert werden.",
+                keywords: ["Standortverlagerung", "Automatisierungstechnik", "Maschinenumzug", "Demontage", "Neuinstallation"],
+                estimatedValue: "1.000.000 - 5.000.000",
+                projectTimeline: "Q4 2025 - Q3 2026",
+                contactPersons: [
+                    {
+                        name: "Thomas Hoffmann",
+                        position: "Director Industrial Operations",
+                        department: "Siemens Digital Industries",
+                        email: "thomas.hoffmann@siemens.com",
+                        phone: "+49 911 895-1234",
+                        linkedinUrl: "https://www.linkedin.com/in/thomas-hoffmann-siemens",
+                        linkedinProfile: "thomas-hoffmann-siemens",
+                        photo: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face"
+                    }
+                ],
+                nextSteps: "Angebot für Demontage und Neuaufbau erstellen - Vergabe läuft bereits",
+                urgencyLevel: "Sehr hoch - Entscheidung in 6 Wochen",
+                competitorRisk: "Hoch",
+                tags: ["Automation", "Relocation", "Complex Machinery"],
+                lastUpdated: "2025-06-29T14:15:00Z"
+            },
+            {
+                id: 3,
+                title: "Bayer baut neue Pharmafabrik in Leverkusen",
+                company: "Bayer AG",
+                location: "Leverkusen, Nordrhein-Westfalen",
+                region: "nordrhein-westfalen",
+                category: "new_facility",
+                priority: "medium",
+                confidence: 75,
+                source: "Chemie Technik",
+                sourceUrl: "https://chemietechnik.de/pharma/bayer-leverkusen",
+                date: "2025-06-27",
+                publishedDate: "27.06.2025",
+                description: "Neubau einer hochmodernen Produktionsstätte für Spezialchemikalien und Pharmazeutika. Cleanroom-Anlagen, Spezialmaschinenbau und komplexe Verfahrenstechnik erforderlich.",
+                keywords: ["Neubau", "Pharmafabrik", "Spezialchemikalien", "Cleanroom", "Verfahrenstechnik"],
+                estimatedValue: "300.000 - 1.500.000",
+                projectTimeline: "Q3 2025 - Q4 2026",
+                contactPersons: [
+                    {
+                        name: "Robert Klein",
+                        position: "Senior Project Manager",
+                        department: "Bayer Engineering Services",
+                        email: "robert.klein@bayer.com",
+                        phone: "+49 214 30-12345",
+                        linkedinUrl: "https://www.linkedin.com/in/robert-klein-bayer",
+                        linkedinProfile: "robert-klein-bayer",
+                        photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
+                    }
+                ],
+                nextSteps: "Ausschreibungsunterlagen anfordern - Pre-Qualification läuft",
+                urgencyLevel: "Mittel - Planungsphase",
+                competitorRisk: "Mittel",
+                tags: ["Pharma", "Cleanroom", "Chemical Processing"],
+                lastUpdated: "2025-06-28T11:20:00Z"
+            }
+        ];
+
+        // State Management
+        let state = {
+            opportunities: [],
+            filteredOpportunities: [],
+            searchTerm: '',
+            selectedCategory: 'all',
+            selectedPriority: 'all',
+            selectedRegion: 'all',
+            isScanning: false,
+            selectedOpportunity: null
+        };
+
+        // Helper Functions
+        function getPriorityColor(priority) {
+            switch(priority) {
+                case 'high': return 'text-red-600 bg-red-100 border-red-200';
+                case 'medium': return 'text-yellow-600 bg-yellow-100 border-yellow-200';
+                case 'low': return 'text-green-600 bg-green-100 border-green-200';
+                default: return 'text-gray-600 bg-gray-100 border-gray-200';
+            }
+        }
+
+        function getCategoryIcon(category) {
+            const icons = {
+                'expansion': '📈',
+                'relocation': '📍',
+                'new_facility': '🏢',
+                'modernization': '🔧',
+                'closure': '⚠️'
+            };
+            return icons[category] || '🏢';
+        }
+
+        function getCategoryLabel(category) {
+            const labels = {
+                'expansion': 'Erweiterung',
+                'relocation': 'Verlagerung', 
+                'new_facility': 'Neubau',
+                'modernization': 'Modernisierung',
+                'closure': 'Schließung'
+            };
+            return labels[category] || category;
+        }
+
+        function openLinkedInProfile(linkedinUrl) {
+            window.open(linkedinUrl, '_blank');
+        }
+
+        function sendLinkedInMessage(person, opportunity) {
+            const message = `Hallo ${person.name.split(' ')[0]}, ich habe Ihr Projekt "${opportunity.title}" verfolgt und würde gerne über Industriemontagelösungen sprechen. Könnten wir einen kurzen Austausch vereinbaren?`;
+            const linkedinMessageUrl = `https://www.linkedin.com/messaging/compose/?recipient=${person.linkedinProfile}&message=${encodeURIComponent(message)}`;
+            window.open(linkedinMessageUrl, '_blank');
+        }
+
+        function exportOpportunity(opp) {
+            const exportData = {
+                ...opp,
+                exportDate: new Date().toISOString(),
+                exportedBy: "IndustryConnect MVP"
+            };
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `opportunity-${opp.company.replace(/\s+/g, '-').toLowerCase()}-${opp.id}.json`;
+            link.click();
+        }
+
+        function filterOpportunities() {
+            let filtered = state.opportunities.filter(opp => {
+                const matchesSearch = state.searchTerm === '' || 
+                    opp.title.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+                    opp.company.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+                    opp.location.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+                    opp.keywords.some(keyword => keyword.toLowerCase().includes(state.searchTerm.toLowerCase()));
+                
+                const matchesCategory = state.selectedCategory === 'all' || opp.category === state.selectedCategory;
+                const matchesPriority = state.selectedPriority === 'all' || opp.priority === state.selectedPriority;
+                const matchesRegion = state.selectedRegion === 'all' || opp.region === state.selectedRegion;
+                
+                return matchesSearch && matchesCategory && matchesPriority && matchesRegion;
+            });
+            
+            filtered.sort((a, b) => {
+                const priorityOrder = { 'high': 3, 'medium': 2, 'low': 1 };
+                const priorityDiff = priorityOrder[b.priority] - priorityOrder[a.priority];
+                if (priorityDiff !== 0) return priorityDiff;
+                return new Date(b.date) - new Date(a.date);
+            });
+            
+            state.filteredOpportunities = filtered;
+            render();
+        }
+
+        function handleScan() {
+            state.isScanning = true;
+            render();
+            
+            setTimeout(() => {
+                state.isScanning = false;
+                const newOpp = {
+                    id: state.opportunities.length + 1,
+                    title: "BASF erweitert Kunststoffproduktion in Ludwigshafen",
+                    company: "BASF SE",
+                    location: "Ludwigshafen, Rheinland-Pfalz",
+                    region: "rheinland-pfalz",
+                    category: "expansion",
+                    priority: "high",
+                    confidence: 95,
+                    source: "Chemie.de",
+                    sourceUrl: "https://chemie.de/basf-expansion",
+                    date: "2025-06-30",
+                    publishedDate: "30.06.2025",
+                    description: "BASF kündigt Erweiterung der Kunststoffproduktion an. Neue Extrusionsanlagen und Automatisierungssysteme erforderlich.",
+                    keywords: ["Produktionserweiterung", "Kunststoff", "Chemieanlage", "Extrusion"],
+                    estimatedValue: "800.000 - 3.000.000",
+                    projectTimeline: "Q4 2025 - Q3 2026",
+                    contactPersons: [
+                        {
+                            name: "Dr. Frank Zimmermann",
+                            position: "Head of Operations",
+                            department: "BASF Performance Materials",
+                            email: "frank.zimmermann@basf.com",
+                            phone: "+49 621 60-12345",
+                            linkedinUrl: "https://www.linkedin.com/in/frank-zimmermann-basf",
+                            linkedinProfile: "frank-zimmermann-basf",
+                            photo: "https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=150&h=150&fit=crop&crop=face"
+                        }
+                    ],
+                    nextSteps: "Sofortiger Kontakt empfohlen - Entscheidung steht bevor",
+                    urgencyLevel: "Sehr hoch - Entscheidung in 2 Wochen",
+                    competitorRisk: "Sehr hoch",
+                    tags: ["Chemical", "Plastics", "High Priority"],
+                    lastUpdated: "2025-06-30T12:00:00Z"
+                };
+                state.opportunities.unshift(newOpp);
+                filterOpportunities();
+            }, 3000);
+        }
+
+        function showOpportunityDetails(opp) {
+            state.selectedOpportunity = opp;
+            render();
+        }
+
+        function closeModal() {
+            state.selectedOpportunity = null;
+            render();
+        }
+
+        function createOpportunityCard(opp) {
+            return `
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all">
+                    <div class="p-6">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-start gap-3 flex-1">
+                                <div class="p-2 rounded-lg ${opp.priority === 'high' ? 'bg-red-100' : opp.priority === 'medium' ? 'bg-yellow-100' : 'bg-green-100'}">
+                                    <span class="text-lg">${getCategoryIcon(opp.category)}</span>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <h3 class="text-lg font-semibold text-gray-900">${opp.title}</h3>
+                                        ${opp.urgencyLevel.includes('Sehr hoch') ? '<span class="px-2 py-1 bg-red-600 text-white text-xs rounded-full animate-pulse">EILIG</span>' : ''}
+                                    </div>
+                                    <div class="flex items-center gap-4 text-sm text-gray-600 mb-2">
+                                        <span class="flex items-center gap-1">
+                                            🏢 ${opp.company}
+                                        </span>
+                                        <span class="flex items-center gap-1">
+                                            📍 ${opp.location}
+                                        </span>
+                                        <span class="flex items-center gap-1">
+                                            📅 ${opp.publishedDate}
+                                        </span>
+                                        <span class="flex items-center gap-1">
+                                            👥 ${opp.contactPersons.length} Kontakt${opp.contactPersons.length !== 1 ? 'e' : ''}
+                                        </span>
+                                    </div>
+                                    <p class="text-gray-700 text-sm leading-relaxed">${opp.description}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-col items-end gap-2 ml-4">
+                                <span class="px-3 py-1 rounded-full text-xs font-medium border ${getPriorityColor(opp.priority)}">
+                                    ${opp.priority === 'high' ? 'Hoch' : opp.priority === 'medium' ? 'Mittel' : 'Niedrig'}
+                                </span>
+                                <div class="text-xs text-gray-500 text-right">
+                                    <div>${opp.confidence}% Konfidenz</div>
+                                    <div class="text-green-600 font-medium">€${opp.estimatedValue}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div>
+                                <h4 class="font-medium text-gray-900 mb-2 text-sm">Projektdetails</h4>
+                                <div class="space-y-1 text-xs text-gray-600">
+                                    <div>Kategorie: ${getCategoryLabel(opp.category)}</div>
+                                    <div>Zeitrahmen: ${opp.projectTimeline}</div>
+                                    <div>Dringlichkeit: <span class="text-red-600">${opp.urgencyLevel}</span></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-medium text-gray-900 mb-2 text-sm">Keywords</h4>
+                                <div class="flex flex-wrap gap-1">
+                                    ${opp.keywords.slice(0, 4).map(keyword => 
+                                        `<span class="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">${keyword}</span>`
+                                    ).join('')}
+                                    ${opp.keywords.length > 4 ? `<span class="px-2 py-1 bg-gray-100 text-gray-500 text-xs rounded">+${opp.keywords.length - 4}</span>` : ''}
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 class="font-medium text-gray-900 mb-2 text-sm">Top Kontakte</h4>
+                                <div class="flex -space-x-2">
+                                    ${opp.contactPersons.slice(0, 3).map(person => 
+                                        `<img src="${person.photo}" alt="${person.name}" title="${person.name}" 
+                                         class="w-8 h-8 rounded-full border-2 border-white object-cover cursor-pointer hover:scale-110 transition-all"
+                                         onclick="openLinkedInProfile('${person.linkedinUrl}')">`
+                                    ).join('')}
+                                    ${opp.contactPersons.length > 3 ? `<div class="w-8 h-8 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center text-xs text-gray-600">+${opp.contactPersons.length - 3}</div>` : ''}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3 pt-4 border-t border-gray-200">
+                            <div class="flex gap-2 flex-1">
+                                ${opp.contactPersons.slice(0, 2).map(person => 
+                                    `<button onclick="sendLinkedInMessage(${JSON.stringify(person).replace(/"/g, '&quot;')}, ${JSON.stringify(opp).replace(/"/g, '&quot;')})"
+                                             class="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-all"
+                                             title="LinkedIn Nachricht an ${person.name}">
+                                        🔗 ${person.name.split(' ')[0]}
+                                    </button>`
+                                ).join('')}
+                                ${opp.contactPersons.length > 2 ? `<button onclick="showOpportunityDetails(${JSON.stringify(opp).replace(/"/g, '&quot;')})" class="px-3 py-2 bg-gray-100 text-gray-700 text-sm rounded-lg hover:bg-gray-200 transition-all">+${opp.contactPersons.length - 2} weitere</button>` : ''}
+                            </div>
+                            
+                            <div class="flex gap-2">
+                                <button onclick="showOpportunityDetails(${JSON.stringify(opp).replace(/"/g, '&quot;')})" class="px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-medium">
+                                    👁️ Details
+                                </button>
+                                <button onclick="exportOpportunity(${JSON.stringify(opp).replace(/"/g, '&quot;')})" class="px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-medium" title="Als JSON exportieren">
+                                    💾 Export
+                                </button>
+                                <button class="px-4 py-2 bg-yellow-500 text-white hover:bg-yellow-600 rounded-lg text-sm font-medium">
+                                    ⭐ Favorit
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mt-3 text-sm">
+                            <span class="text-green-600 font-medium">Nächste Schritte:</span>
+                            <span class="text-gray-700 ml-2">${opp.nextSteps}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createModal(opportunity) {
+            if (!opportunity) return '';
+            
+            return `
+                <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onclick="closeModal()">
+                    <div class="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+                        <div class="p-6 border-b border-gray-200">
+                            <div class="flex items-center justify-between">
+                                <h2 class="text-2xl font-bold text-gray-900">${opportunity.title}</h2>
+                                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-2xl">×</button>
+                            </div>
+                        </div>
+                        
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                <div class="lg:col-span-2">
+                                    <div class="mb-6">
+                                        <h3 class="text-lg font-semibold mb-3">Projektdetails</h3>
+                                        <p class="text-gray-700 mb-4">${opportunity.description}</p>
+                                        
+                                        <div class="grid grid-cols-2 gap-4 mb-4">
+                                            <div>
+                                                <span class="font-medium text-gray-900">Geschätzter Wert:</span>
+                                                <p class="text-green-600 font-semibold">€${opportunity.estimatedValue}</p>
+                                            </div>
+                                            <div>
+                                                <span class="font-medium text-gray-900">Zeitrahmen:</span>
+                                                <p class="text-gray-700">${opportunity.projectTimeline}</p>
+                                            </div>
+                                            <div>
+                                                <span class="font-medium text-gray-900">Dringlichkeit:</span>
+                                                <p class="text-red-600 font-medium">${opportunity.urgencyLevel}</p>
+                                            </div>
+                                            <div>
+                                                <span class="font-medium text-gray-900">Konkurrenzrisiko:</span>
+                                                <p class="text-yellow-600">${opportunity.competitorRisk}</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <span class="font-medium text-gray-900">Keywords:</span>
+                                            <div class="flex flex-wrap gap-2 mt-2">
+                                                ${opportunity.keywords.map(keyword => 
+                                                    `<span class="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">${keyword}</span>`
+                                                ).join('')}
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <span class="font-medium text-gray-900">Nächste Schritte:</span>
+                                            <p class="text-green-700 mt-1">${opportunity.nextSteps}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h3 class="text-lg font-semibold mb-4">Ansprechpartner</h3>
+                                    <div class="space-y-4">
+                                        ${opportunity.contactPersons.map(person => `
+                                            <div class="border border-gray-200 rounded-lg p-4">
+                                                <div class="flex items-center gap-3 mb-3">
+                                                    <img src="${person.photo}" alt="${person.name}" class="w-12 h-12 rounded-full object-cover">
+                                                    <div>
+                                                        <h4 class="font-medium text-gray-900">${person.name}</h4>
+                                                        <p class="text-sm text-gray-600">${person.position}</p>
+                                                        <p class="text-xs text-gray-500">${person.department}</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="space-y-2 mb-4 text-sm">
+                                                    <div class="flex items-center gap-2">
+                                                        📧 <a href="mailto:${person.email}" class="text-blue-600 hover:underline">${person.email}</a>
+                                                    </div>
+                                                    <div class="flex items-center gap-2">
+                                                        📞 <a href="tel:${person.phone}" class="text-blue-600 hover:underline">${person.phone}</a>
+                                                    </div>
+                                                </div>
+
+                                                <div class="flex gap-2">
+                                                    <button onclick="openLinkedInProfile('${person.linkedinUrl}')" class="flex-1 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
+                                                        🔗 Profil
+                                                    </button>
+                                                    <button onclick="sendLinkedInMessage(${JSON.stringify(person).replace(/"/g, '&quot;')}, ${JSON.stringify(opportunity).replace(/"/g, '&quot;')})" class="flex-1 px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700">
+                                                        💬 Nachricht
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+
+                                    <div class="mt-6 pt-4 border-t border-gray-200">
+                                        <h4 class="font-medium text-gray-900 mb-2">Quelle</h4>
+                                        <a href="${opportunity.sourceUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline flex items-center gap-1 text-sm">
+                                            🔗 ${opportunity.source}
+                                        </a>
+                                        <p class="text-xs text-gray-500 mt-1">Veröffentlicht: ${opportunity.publishedDate}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function render() {
+            const app = document.getElementById('app');
+            
+            app.innerHTML = `
+                <!-- Header -->
+                <div class="bg-white border-b border-gray-200 sticky top-0 z-40">
+                    <div class="max-w-7xl mx-auto px-4 py-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 bg-blue-600 rounded-lg">
+                                    <span class="text-white text-xl">🏢</span>
+                                </div>
+                                <div>
+                                    <h1 class="text-2xl font-bold text-gray-900">IndustryConnect</h1>
+                                    <p class="text-sm text-gray-600">MVP - Industriemontage Opportunity Tracker</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <button onclick="handleScan()" ${state.isScanning ? 'disabled' : ''} class="px-4 py-2 rounded-lg font-medium flex items-center gap-2 ${state.isScanning ? 'bg-gray-400 cursor-not-allowed text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}">
+                                    ${state.isScanning ? '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Scannen...' : '🔔 Neue Opportunities'}
+                                </button>
+                                <div class="text-sm text-gray-600 px-3 py-2 bg-gray-100 rounded-lg">
+                                    ${state.filteredOpportunities.length} von ${state.opportunities.length}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="max-w-7xl mx-auto p-4">
+                    <!-- Filter und Suche -->
+                    <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                            <div class="relative md:col-span-2">
+                                <span class="absolute left-3 top-3 text-gray-400">🔍</span>
+                                <input type="text" placeholder="Suchen nach Unternehmen, Standort, Keywords..." value="${state.searchTerm}" onkeyup="state.searchTerm = this.value; filterOpportunities()" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            
+                            <select onchange="state.selectedCategory = this.value; filterOpportunities()" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="all" ${state.selectedCategory === 'all' ? 'selected' : ''}>Alle Kategorien</option>
+                                <option value="expansion" ${state.selectedCategory === 'expansion' ? 'selected' : ''}>Erweiterung</option>
+                                <option value="relocation" ${state.selectedCategory === 'relocation' ? 'selected' : ''}>Verlagerung</option>
+                                <option value="new_facility" ${state.selectedCategory === 'new_facility' ? 'selected' : ''}>Neubau</option>
+                                <option value="modernization" ${state.selectedCategory === 'modernization' ? 'selected' : ''}>Modernisierung</option>
+                                <option value="closure" ${state.selectedCategory === 'closure' ? 'selected' : ''}>Schließung</option>
+                            </select>
+
+                            <select onchange="state.selectedPriority = this.value; filterOpportunities()" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="all" ${state.selectedPriority === 'all' ? 'selected' : ''}>Alle Prioritäten</option>
+                                <option value="high" ${state.selectedPriority === 'high' ? 'selected' : ''}>Hoch</option>
+                                <option value="medium" ${state.selectedPriority === 'medium' ? 'selected' : ''}>Mittel</option>
+                                <option value="low" ${state.selectedPriority === 'low' ? 'selected' : ''}>Niedrig</option>
+                            </select>
+
+                            <select onchange="state.selectedRegion = this.value; filterOpportunities()" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="all" ${state.selectedRegion === 'all' ? 'selected' : ''}>Alle Regionen</option>
+                                <option value="nordrhein-westfalen" ${state.selectedRegion === 'nordrhein-westfalen' ? 'selected' : ''}>Nordrhein-Westfalen</option>
+                                <option value="bayern" ${state.selectedRegion === 'bayern' ? 'selected' : ''}>Bayern</option>
+                                <option value="baden-württemberg" ${state.selectedRegion === 'baden-württemberg' ? 'selected' : ''}>Baden-Württemberg</option>
+                                <option value="niedersachsen" ${state.selectedRegion === 'niedersachsen' ? 'selected' : ''}>Niedersachsen</option>
+                                <option value="sachsen" ${state.selectedRegion === 'sachsen' ? 'selected' : ''}>Sachsen</option>
+                                <option value="rheinland-pfalz" ${state.selectedRegion === 'rheinland-pfalz' ? 'selected' : ''}>Rheinland-Pfalz</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Opportunities Liste -->
+                    <div class="space-y-4">
+                        ${state.filteredOpportunities.length === 0 && state.opportunities.length > 0 ? 
+                            `<div class="text-center py-12 bg-white rounded-lg">
+                                <div class="text-gray-500 mb-4">
+                                    <span class="text-4xl mb-2 block">🔍</span>
+                                    <p class="text-lg font-medium">Keine Opportunities gefunden</p>
+                                    <p>Versuchen Sie andere Filterkriterien oder Suchbegriffe.</p>
+                                </div>
+                            </div>` : 
+                            state.filteredOpportunities.map(opp => createOpportunityCard(opp)).join('')
+                        }
+                        
+                        ${state.opportunities.length === 0 ? 
+                            `<div class="text-center py-12 bg-white rounded-lg">
+                                <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                                <p class="text-gray-500 text-lg">Lade Opportunities...</p>
+                                <p class="text-gray-400 text-sm mt-2">Durchsuche Datenquellen nach neuen Projekten</p>
+                            </div>` : ''
+                        }
+                    </div>
+
+                    <!-- Footer mit MVP Info -->
+                    <div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
+                        <div class="flex items-start gap-3">
+                            <div class="p-2 bg-blue-600 rounded-lg">
+                                <span class="text-white">🏢</span>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-blue-900 mb-2">IndustryConnect MVP - Proof of Concept</h3>
+                                <p class="text-blue-700 text-sm mb-3">
+                                    Diese Demo zeigt das Potenzial eines automatisierten Opportunity-Tracking-Systems für Industriemontagedienstleister. 
+                                    In der Vollversion würden echte Datenquellen (Pressemitteilungen, Ausschreibungen, Baugenehmigungen) kontinuierlich überwacht.
+                                </p>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="px-3 py-1 bg-blue-200 text-blue-800 text-xs rounded-full">✓ LinkedIn-Integration</span>
+                                    <span class="px-3 py-1 bg-blue-200 text-blue-800 text-xs rounded-full">✓ Automatisches Monitoring</span>
+                                    <span class="px-3 py-1 bg-blue-200 text-blue-800 text-xs rounded-full">✓ Prioritätsbewertung</span>
+                                    <span class="px-3 py-1 bg-blue-200 text-blue-800 text-xs rounded-full">✓ Export-Funktionen</span>
+                                    <span class="px-3 py-1 bg-blue-200 text-blue-800 text-xs rounded-full">✓ Kontaktmanagement</span>
+                                </div>
+                                <div class="mt-4 p-3 bg-white rounded border border-blue-300">
+                                    <p class="text-sm text-blue-800"><strong>Demo-Hinweis:</strong> Dies ist eine Demonstration mit Beispieldaten. Die LinkedIn-Buttons öffnen echte LinkedIn-Profile, aber die Daten sind zu Demonstrationszwecken erstellt.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal -->
+                ${createModal(state.selectedOpportunity)}
+            `;
+        }
+
+        // Initialize App
+        function init() {
+            state.opportunities = mockOpportunities;
+            state.filteredOpportunities = mockOpportunities;
+            render();
+        }
+
+        // Start the app when page loads
+        window.onload = init;
+    </script>
+</body>
+</html>
+                
